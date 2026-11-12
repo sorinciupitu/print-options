@@ -581,6 +581,14 @@
 	overflow: hidden;
 }
 
+/* The shortcode prints its own H1; hide the duplicated theme title here. */
+.pov-quote-page .page-title,
+.pov-quote-page .entry-title,
+.pov-quote-page .page-header,
+.pov-quote-page .entry-header {
+	display: none;
+}
+
 /* Admin ----------------------------------------------------------------- */
 
 .pov-quotes-total {

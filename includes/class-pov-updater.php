@@ -28,10 +28,31 @@ final class POV_Updater {
         add_action('upgrader_process_complete', array(__CLASS__, 'clear_cache'), 10, 2);
         add_action('upgrader_source_selection', array(__CLASS__, 'fix_source_dir'), 10, 4);
         add_action('admin_init', array(__CLASS__, 'maybe_refresh'), 1);
+        add_action('admin_notices', array(__CLASS__, 'check_notice'));
     }
 
     public static function repo() {
         return defined('POV_GITHUB_REPO') ? POV_GITHUB_REPO : 'sorinciupitu/print-options';
+    }
+
+    /**
+     * Real plugin basename, so updates keep working even if the folder was
+     * renamed (for example a GitHub "Download ZIP" install).
+     */
+    public static function basename() {
+        if (defined('POV_FILE') && function_exists('plugin_basename')) {
+            $basename = plugin_basename(POV_FILE);
+            if ($basename) {
+                return $basename;
+            }
+        }
+        return self::SLUG;
+    }
+
+    public static function folder() {
+        $basename = self::basename();
+        $folder   = dirname($basename);
+        return '.' === $folder ? 'print-options' : $folder;
     }
 
     public static function plugin_url() {
@@ -124,10 +145,11 @@ final class POV_Updater {
             return $transient;
         }
 
+        $key                = self::basename();
         $item               = new stdClass();
-        $item->id           = self::SLUG;
+        $item->id           = $key;
         $item->slug         = 'print-options';
-        $item->plugin       = self::SLUG;
+        $item->plugin       = $key;
         $item->new_version  = $release['version'];
         $item->url          = self::plugin_url();
         $item->package      = $release['package'];
@@ -140,10 +162,10 @@ final class POV_Updater {
         if (!isset($transient->response) || !is_array($transient->response)) {
             $transient->response = array();
         }
-        $transient->response[self::SLUG] = $item;
+        $transient->response[$key] = $item;
 
         if (isset($transient->no_update) && is_array($transient->no_update)) {
-            unset($transient->no_update[self::SLUG]);
+            unset($transient->no_update[$key]);
         }
 
         return $transient;
@@ -176,7 +198,7 @@ final class POV_Updater {
     }
 
     public static function row_meta($links, $file) {
-        if (self::SLUG !== $file) {
+        if (self::basename() !== $file) {
             return $links;
         }
 
@@ -189,6 +211,17 @@ final class POV_Updater {
         $links[] = '<a href="' . esc_url($url) . '">Verifică actualizări</a>';
 
         return $links;
+    }
+
+    public static function check_notice() {
+        if (empty($_GET['pov_checked']) || !current_user_can('update_plugins')) {
+            return;
+        }
+        $release = self::release();
+        $message = self::has_update($release)
+            ? 'Există o versiune nouă: <strong>' . esc_html($release['version']) . '</strong>.'
+            : 'Pluginul Print Options este la zi.';
+        echo '<div class="notice notice-info is-dismissible"><p>Verificare actualizări GitHub: ' . $message . '</p></div>';
     }
 
     public static function force_check() {
@@ -216,12 +249,13 @@ final class POV_Updater {
      * zipball (print-options-main) is used instead of the release asset.
      */
     public static function fix_source_dir($source, $remote_source, $upgrader, $hook_extra) {
-        if (!is_array($hook_extra) || empty($hook_extra['plugin']) || self::SLUG !== $hook_extra['plugin']) {
+        if (!is_array($hook_extra) || empty($hook_extra['plugin']) || self::basename() !== $hook_extra['plugin']) {
             return $source;
         }
 
+        $folder = self::folder();
         $source = untrailingslashit((string) $source);
-        if ('print-options' === basename($source)) {
+        if ($folder === basename($source)) {
             return trailingslashit($source);
         }
 
@@ -231,8 +265,8 @@ final class POV_Updater {
             WP_Filesystem();
         }
 
-        $target = trailingslashit($remote_source) . 'print-options';
-        if (basename($source) !== 'print-options' && $wp_filesystem && $wp_filesystem->move($source, $target, true)) {
+        $target = trailingslashit($remote_source) . $folder;
+        if (basename($source) !== $folder && $wp_filesystem && $wp_filesystem->move($source, $target, true)) {
             return trailingslashit($target);
         }
 
@@ -258,7 +292,7 @@ final class POV_Updater {
         }
 
         $transient = get_site_transient('update_plugins');
-        if (is_object($transient) && !empty($transient->response[ self::SLUG ])) {
+        if (is_object($transient) && !empty($transient->response[ self::basename() ])) {
             return;
         }
 

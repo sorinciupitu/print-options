@@ -40,6 +40,7 @@ final class POV_Quote {
         add_action('admin_post_pov_quote_status', array(__CLASS__, 'admin_toggle_status'));
         add_action('admin_post_pov_quote_settings', array(__CLASS__, 'admin_save_settings'));
         add_filter('upload_mimes', array(__CLASS__, 'allow_mimes'));
+        add_filter('body_class', array(__CLASS__, 'body_class'));
         add_filter('wp_check_filetype_and_ext', array(__CLASS__, 'allow_postscript'), 10, 4);
     }
 
@@ -141,6 +142,17 @@ final class POV_Quote {
                 'error' => 'Poți adăuga maximum ' . self::MAX_ITEMS . ' produse într-o cerere.',
             )
         );
+    }
+
+    /**
+     * The shortcode renders its own H1, so the theme page title is hidden on
+     * this page only (see assets/quote.css).
+     */
+    public static function body_class($classes) {
+        if (self::is_quote_page()) {
+            $classes[] = 'pov-quote-page';
+        }
+        return $classes;
     }
 
     public static function is_quote_page() {

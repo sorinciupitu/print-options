@@ -9,6 +9,7 @@ define('HOUR_IN_SECONDS', 3600);
 define('MINUTE_IN_SECONDS', 60);
 define('POV_VERSION', getenv('POV_TEST_VERSION') ?: '1.7.0');
 define('POV_GITHUB_REPO', 'sorinciupitu/print-options');
+define('POV_FILE', dirname(__DIR__) . '/print-options.php');
 
 $GLOBALS['pov_test'] = array(
     'options'     => array(),
@@ -224,6 +225,8 @@ function wp_mail($to, $subject, $message, $headers = array()) {
 }
 function wp_update_plugins() {}
 function plugin_dir_path($file) { return rtrim(dirname($file), '/') . '/'; }
+function plugin_basename($file) { return 'print-options/' . basename($file); }
+function trailingslashit($value) { return rtrim((string) $value, '/\\') . '/'; }
 function register_activation_hook($file, $callback) {}
 function checked($checked, $current = true, $display = true) {
     $result = ((string) $checked === (string) $current) ? " checked='checked'" : '';
@@ -239,7 +242,6 @@ function submit_button($text = 'Save Changes', $type = 'primary', $name = 'submi
 function wp_enqueue_media($args = array()) {}
 function settings_fields($group) {}
 function wp_parse_args($args, $defaults = array()) { return array_merge((array) $defaults, (array) $args); }
-function trailingslashit($value) { return rtrim((string) $value, '/\\') . '/'; }
 function untrailingslashit($value) { return rtrim((string) $value, '/\\'); }
 function wp_handle_upload($file, $overrides = array()) {
     $uploads = $GLOBALS['pov_test']['uploads'];
