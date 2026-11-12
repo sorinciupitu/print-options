@@ -1,0 +1,80 @@
+name: Release plugin
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'print-options.php'
+      - 'includes/**'
+      - 'assets/**'
+      - 'readme.txt'
+      - 'bin/build.php'
+      - '.github/workflows/release.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: release-main
+  cancel-in-progress: false
+
+jobs:
+  release:
+    name: Build and publish
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.2'
+          extensions: zip
+          coverage: none
+
+      - name: Lint PHP
+        run: |
+          find . -name '*.php' -not -path './.git/*' -not -path './dist/*' -print0 \
+            | xargs -0 -n1 php -l
+
+      - name: Compute version
+        id: version
+        run: |
+          BASE=$(php -r '$s=file_get_contents("print-options.php"); preg_match("/^ \* Version:\s*([0-9]+\.[0-9]+)/m", $s, $m); echo isset($m[1]) ? $m[1] : "1.0";')
+          COUNT=$(git rev-list --count HEAD)
+          VERSION="${BASE}.${COUNT}"
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+          echo "tag=v$VERSION" >> "$GITHUB_OUTPUT"
+          echo "Releasing $VERSION"
+
+      - name: Check tag
+        id: check
+        run: |
+          if git ls-remote --exit-code --tags origin "refs/tags/${{ steps.version.outputs.tag }}" >/dev/null 2>&1; then
+            echo "exists=true" >> "$GITHUB_OUTPUT"
+            echo "Tag ${{ steps.version.outputs.tag }} already exists, nothing to publish."
+          else
+            echo "exists=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Build plugin zip
+        if: steps.check.outputs.exists == 'false'
+        run: php bin/build.php --version=${{ steps.version.outputs.version }} --out=dist
+
+      - name: Publish GitHub release
+        if: steps.check.outputs.exists == 'false'
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ steps.version.outputs.tag }}
+          name: v${{ steps.version.outputs.version }}
+          body: |
+            Actualizare automată a pluginului **Print Options for WooCommerce**.
+
+            Instalează din **WordPress → Actualizări** sau descarcă `print-options.zip` de mai jos.
+          generate_release_notes: true
+          files: dist/print-options.zip
+          fail_on_unmatched_files: true

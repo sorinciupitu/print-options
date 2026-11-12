@@ -1,0 +1,35 @@
+/* Admin studio - scoped to this plugin's product metabox */
+#pov_options{border:1px solid #dbe2ec;border-radius:14px;overflow:hidden;box-shadow:0 4px 20px rgba(20,36,60,.05)}
+#pov_options>.postbox-header{background:#f8fafc;border-bottom:1px solid #e5eaf1}
+#pov_options .inside{padding:22px 24px;margin:0;background:#fff;color:#25364b}
+#pov_options .pov-studio-intro{display:flex;align-items:center;gap:14px;padding:18px 20px;background:linear-gradient(110deg,#152a46,#294768);color:#fff;border-radius:12px;margin-bottom:18px}
+#pov_options .pov-studio-icon{font-size:27px;background:#ffffff20;padding:12px;border-radius:12px}
+#pov_options .pov-studio-intro h2{color:#fff;font-size:19px;margin:0 0 5px;padding:0}
+#pov_options .pov-studio-intro p{margin:0;color:#d8e4f2}
+#pov_options .pov-tabs{display:flex;flex-wrap:wrap;gap:8px;border-bottom:1px solid #e1e7ef;padding-bottom:13px;margin-bottom:20px}
+#pov_options .pov-tab{border:1px solid #d9e2ed;border-radius:9px;padding:10px 17px;background:#fff;color:#42546b;font-weight:650;cursor:pointer}
+#pov_options .pov-tab[aria-selected=true]{background:#eaf3ff;color:#1559aa;border-color:#8cbaf2}
+#pov_options .pov-pane[hidden]{display:none!important}
+#pov_options .pov-pane>h3{font-size:18px;margin:6px 0 16px}
+#pov_options .pov-admin-settings{max-width:950px}
+#pov_options .pov-admin-settings>p:not(.description){padding:13px 16px;background:#f8fafc;border:1px solid #e5eaf1;border-radius:10px;margin:10px 0}
+#pov_options .pov-admin-settings input[type=text],#pov_options .pov-admin-settings input[type=url],#pov_options .pov-admin-settings textarea,#pov_options .pov-admin-settings select{border-radius:7px;border-color:#cbd5e1}
+#pov_options .pov-admin-group{border:1px solid #d9e3ee;background:#fff;padding:18px;margin:0 0 15px;border-radius:13px;box-shadow:0 3px 12px rgba(30,55,85,.035)}
+#pov_options .pov-admin-head{display:flex;align-items:center;justify-content:space-between;gap:12px;padding-bottom:13px;border-bottom:1px solid #e8edf3}
+#pov_options .pov-admin-head strong{font-size:15px}
+#pov_options .pov-admin-group>p{margin:14px 0}
+#pov_options .pov-group-title{margin-top:6px;font-size:15px;font-weight:600;min-height:38px;border-radius:8px}
+#pov_options .pov-admin-options{display:grid;gap:9px;margin:16px 0}
+#pov_options .pov-admin-option{display:grid;grid-template-columns:60px minmax(160px,2fr) 100px 120px minmax(100px,1fr) 76px 32px;gap:9px;align-items:center;padding:11px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:10px;margin:0;min-width:0}
+#pov_options .pov-admin-option input,#pov_options .pov-admin-option select{width:100%;min-width:0;height:37px;border-radius:7px;border-color:#cbd5e1}
+#pov_options .pov-admin-option .pov-image{font-size:12px}
+#pov_options .pov-thumb{height:48px;width:52px;object-fit:cover;border:1px solid #d8e0e9;border-radius:8px;background:#e8edf3}
+#pov_options .pov-remove-option{font-size:20px;text-align:center;color:#bf3535}
+#pov_options .pov-add-option,#pov_options #pov-add-group{border-radius:8px;border-color:#b4cee9;color:#165b9f;font-weight:600;padding:3px 14px}
+#pov_options .pov-count{font-size:12px;color:#64748b;font-weight:500}
+#pov_options .pov-admin-group.is-collapsed .pov-group-body{display:none}
+#pov_options .pov-collapse{background:#fff;border:1px solid #d4deea;border-radius:7px;cursor:pointer;padding:5px 10px}
+#pov_options .pov-group-tools{display:flex;align-items:center;gap:10px}
+#pov_options .pov-csv-help{padding:18px 20px;background:#f0f7ff;border:1px solid #c8def8;border-radius:11px;line-height:1.8;max-width:850px}
+@media(max-width:1250px){#pov_options .pov-admin-option{grid-template-columns:52px minmax(120px,1fr) 100px 120px 72px 32px}#pov_options .pov-admin-option .pov-image{grid-column:2/5}#pov_options .pov-admin-option .pov-media{grid-column:5}}
+@media(max-width:782px){#pov_options .inside{padding:14px}#pov_options .pov-admin-option{grid-template-columns:50px 1fr 1fr}#pov_options .pov-admin-option .pov-label{grid-column:2/4}#pov_options .pov-admin-option .pov-image{grid-column:1/4}#pov_options .pov-admin-option .pov-media{grid-column:1/3}#pov_options .pov-admin-option .pov-remove-option{grid-column:3}#pov_options .pov-studio-intro{padding:14px}}
