@@ -72,21 +72,41 @@ check(0 === (int) $settings['quote'], 'quote flag is cleared when unchecked');
 check(0 === (int) $plugin->settings(55)['min'] - 1, 'existing settings still round trip');
 
 echo "\nProduct page button\n";
-update_post_meta(123, '_pov_settings', array('quote' => 1, 'min' => 1, 'step' => 1, 'mode' => 'fixed'));
-$GLOBALS['product'] = new WC_Product(123, 'Meniu restaurant A4');
+update_post_meta(125, '_pov_settings', array('quote' => 1, 'min' => 1, 'step' => 1, 'mode' => 'fixed'));
+$GLOBALS['product'] = new WC_Product(125, 'Meniu restaurant A4');
 ob_start();
 $plugin->quote_button();
 $button = ob_get_clean();
 
 check(false !== strpos($button, 'pov-quote-btn'), 'button markup rendered');
 check(false !== strpos($button, 'Cere ofertă'), 'button label is correct');
-check(false !== strpos($button, 'pov_product=123'), 'button links to the quote page with the product id');
+check(false !== strpos($button, 'pov_product=125'), 'button links to the quote page with the product id');
 
-update_post_meta(123, '_pov_settings', array('quote' => 0, 'min' => 1, 'step' => 1, 'mode' => 'fixed'));
+update_post_meta(126, '_pov_settings', array('quote' => 0, 'min' => 1, 'step' => 1, 'mode' => 'fixed'));
+$GLOBALS['product'] = new WC_Product(126, 'Produs fara oferta');
 ob_start();
 $plugin->quote_button();
 $button = ob_get_clean();
 check('' === trim($button), 'no button when the option is off');
+
+echo "\nProduct page hooks\n";
+update_post_meta(123, '_pov_settings', array('quote' => 1, 'min' => 1, 'step' => 1, 'mode' => 'fixed'));
+$GLOBALS['product'] = new WC_Product(123, 'Meniu restaurant A4', 12.5, true);
+ob_start();
+do_action('woocommerce_after_add_to_cart_form');
+do_action('woocommerce_single_product_summary');
+$output = ob_get_clean();
+check(1 === substr_count($output, 'pov-quote-btn'), 'button prints once for a purchasable product');
+
+// A product without a price is not purchasable, so WooCommerce never renders
+// the add-to-cart form; the summary hook still has to output the button.
+update_post_meta(124, '_pov_settings', array('quote' => 1, 'min' => 1, 'step' => 1, 'mode' => 'fixed'));
+$GLOBALS['product'] = new WC_Product(124, 'Proiect complex fara pret', '', false);
+ob_start();
+do_action('woocommerce_single_product_summary');
+$output = ob_get_clean();
+check(1 === substr_count($output, 'pov-quote-btn'), 'button appears for a product without a price');
+check(false !== strpos($output, 'pov_product=124'), 'button keeps the product id');
 
 echo "\nQuote page URL\n";
 check('https://example.test/?p=10' === POV_Quote::page_url(), 'page url comes from the stored page');

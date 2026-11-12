@@ -3,7 +3,7 @@
  * Plugin Name: Print Options for WooCommerce
  * Plugin URI: https://github.com/sorinciupitu/print-options
  * Description: Visual product options, quantity increments, fixed/dynamic pricing and a "Cere ofertă" quote request flow for WooCommerce.
- * Version: 1.7.0
+ * Version: 1.8.0
  * Author: Sorin Ciupitu
  * Author URI: https://github.com/sorinciupitu
  * License: GPL-2.0-or-later
@@ -15,7 +15,7 @@
  * Update URI: https://github.com/sorinciupitu/print-options
  */
 if (!defined('ABSPATH')) exit;
-if (!defined('POV_VERSION')) define('POV_VERSION', '1.7.0');
+if (!defined('POV_VERSION')) define('POV_VERSION', '1.8.0');
 if (!defined('POV_FILE')) define('POV_FILE', __FILE__);
 if (!defined('POV_DIR')) define('POV_DIR', plugin_dir_path(__FILE__));
 if (!defined('POV_GITHUB_REPO')) define('POV_GITHUB_REPO', 'sorinciupitu/print-options');
@@ -23,10 +23,11 @@ require_once POV_DIR . 'includes/class-pov-quote.php';
 require_once POV_DIR . 'includes/class-pov-updater.php';
 final class Print_Options_WC {
  const META='_pov_groups', SETTINGS='_pov_settings', VERSION=POV_VERSION;
+ private $quote_printed=[];
  function __construct(){
   add_action('admin_menu',[$this,'appearance_menu']); add_action('admin_post_pov_save_template',[$this,'save_template']); add_action('admin_post_pov_bulk_apply',[$this,'bulk_apply']); add_filter('woocommerce_product_export_column_names',[$this,'csv_columns']); add_filter('woocommerce_product_export_product_default_columns',[$this,'csv_columns']); add_filter('woocommerce_product_export_product_column_pov_settings',[$this,'export_settings'],10,2); add_filter('woocommerce_product_export_product_column_pov_groups',[$this,'export_groups'],10,2); add_filter('woocommerce_csv_product_import_mapping_options',[$this,'csv_columns']); add_filter('woocommerce_csv_product_import_mapping_default_columns',[$this,'csv_mapping']); add_filter('woocommerce_product_import_pre_insert_product_object',[$this,'import_product'],10,2);  add_action('admin_init',[$this,'appearance_register']);
   add_action('add_meta_boxes',[$this,'boxes']); add_action('save_post_product',[$this,'save']); add_action('admin_enqueue_scripts',[$this,'admin_assets']);
-  add_action('woocommerce_before_add_to_cart_button',[$this,'render'],12); add_filter('woocommerce_quantity_input_args',[$this,'quantity_args'],20,2); add_action('woocommerce_after_add_to_cart_form',[$this,'quote_button'],20);
+  add_action('woocommerce_before_add_to_cart_button',[$this,'render'],12); add_filter('woocommerce_quantity_input_args',[$this,'quantity_args'],20,2); add_action('woocommerce_after_add_to_cart_form',[$this,'quote_button'],20); add_action('woocommerce_single_product_summary',[$this,'quote_button'],35);
   add_filter('woocommerce_add_to_cart_validation',[$this,'validate'],10,5); add_filter('woocommerce_update_cart_validation',[$this,'cart_qty_validation'],10,4);
   add_filter('woocommerce_add_cart_item_data',[$this,'cart_data'],10,3); add_filter('woocommerce_get_item_data',[$this,'item_data'],10,2);
   add_action('woocommerce_before_calculate_totals',[$this,'price'],100); add_action('woocommerce_checkout_create_order_line_item',[$this,'order_item'],10,4);
@@ -136,7 +137,7 @@ final class Print_Options_WC {
  function order_item($item,$key,$values,$order){foreach(($values['pov_selection']??[]) as $g)$item->add_meta_data($g['title'],implode(', ',array_map(static fn($o)=>$o['label'],$g['options'])),true);if(!empty($values['pov_artwork_choice']))$item->add_meta_data('Grafică',$values['pov_artwork_choice'],true);if(!empty($values['pov_artwork_url']))$item->add_meta_data('Fișier grafică',esc_url_raw($values['pov_artwork_url']),true);}
  function needs_configurator($id){$s=$this->settings($id);return (bool)$this->groups($id)||$s['mode']!=='fixed'||(int)$s['min']!==1||(int)$s['step']!==1||!empty($s['artwork']);}
  function quote_enabled($id){$s=$this->settings($id);return !empty($s['quote']);}
- function quote_button(){global $product;if(!$product instanceof WC_Product)return;if(!$this->quote_enabled($product->get_id()))return;$url=POV_Quote::button_url($product->get_id());echo '<div class="pov-quote-cta"><a class="pov-quote-btn" href="'.esc_url($url).'">'.POV_Quote::button_icon().'<span>Cere ofertă</span></a></div>';}
+ function quote_button(){global $product;if(!$product instanceof WC_Product)return;$id=(int)$product->get_id();if(isset($this->quote_printed[$id]))return;if(!$this->quote_enabled($id))return;$this->quote_printed[$id]=true;$url=POV_Quote::button_url($id);echo '<div class="pov-quote-cta"><a class="pov-quote-btn" href="'.esc_url($url).'">'.POV_Quote::button_icon().'<span>Cere ofertă</span></a></div>';}
  function frontend_assets(){if(!is_product())return;global $post;if(!$post)return;$config=$this->needs_configurator($post->ID);$quote=$this->quote_enabled($post->ID);if(!$config&&!$quote)return;wp_enqueue_style('pov-front',plugins_url('assets/front.css',__FILE__),[],self::VERSION);if(!$config)return;wp_enqueue_script('pov-front',plugins_url('assets/front.js',__FILE__),[],self::VERSION,true);wp_localize_script('pov-front','povConfig',['locale'=>str_replace('_','-',get_locale()),'currency'=>get_woocommerce_currency(),'decimals'=>wc_get_price_decimals()]);}
 }
 add_action('plugins_loaded',static function(){if(class_exists('WooCommerce'))new Print_Options_WC();});

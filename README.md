@@ -6,7 +6,8 @@ Opțiuni vizuale, cantități și prețuri pentru produsele WooCommerce, plus fl
 
 ## Ce conține
 
-- Buton per produs **„Afisare buton Cere ofertă”** (bifă în editorul de produs, tab *Cerere ofertă*).
+- Buton per produs **„Afisare buton Cere ofertă”** (bifă în editorul de produs, tab *Cerere ofertă*), cu fundal #DA0068, icon și text albe.
+- Funcționează și la produsele **fără preț** (nepublicabile), unde WooCommerce nu afișează deloc formularul „Adaugă în coș” — butonul e singura acțiune disponibilă.
 - Pagina **Cere ofertă** creată automat la activare, cu shortcode-ul `[pov_quote_form]`.
 - Formular cu mai multe produse, descriere, cantitate, încărcare fișiere și date de contact.
 - Cererile sunt salvate în **WooCommerce → Cereri ofertă** și trimise pe email.

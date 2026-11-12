@@ -59,7 +59,14 @@ function add_action($hook, $callback, $priority = 10, $args = 1) {
 function add_filter($hook, $callback, $priority = 10, $args = 1) {
     $GLOBALS['pov_test']['actions'][$hook][] = $callback;
 }
-function do_action($hook, ...$args) {}
+function do_action($hook, ...$args) {
+    if (empty($GLOBALS['pov_test']['actions'][$hook])) {
+        return;
+    }
+    foreach ($GLOBALS['pov_test']['actions'][$hook] as $callback) {
+        call_user_func_array($callback, $args);
+    }
+}
 function apply_filters($hook, $value, ...$args) {
     if (!empty($GLOBALS['pov_test']['actions'][$hook])) {
         foreach ($GLOBALS['pov_test']['actions'][$hook] as $callback) {
@@ -256,23 +263,31 @@ function wp_handle_upload($file, $overrides = array()) {
 class WC_Product {
     protected $id = 0;
     protected $name = '';
-    public function __construct($id = 0, $name = '') {
+    protected $price = '12.5';
+    protected $purchasable = true;
+    public function __construct($id = 0, $name = '', $price = '12.5', $purchasable = true) {
         $this->id = (int) $id;
         $this->name = $name;
+        $this->price = $price;
+        $this->purchasable = (bool) $purchasable;
     }
     public function get_id() { return $this->id; }
     public function get_name() { return $this->name; }
-    public function get_price() { return 12.5; }
+    public function get_price($context = 'view') { return $this->price; }
+    public function is_purchasable() { return $this->purchasable; }
     public function is_type($type) { return 'simple' === $type; }
     public function get_tax_class() { return ''; }
     public function is_taxable() { return false; }
 }
 
 function wc_get_product($id) {
-    if (123 !== (int) $id) {
-        return null;
+    if (123 === (int) $id) {
+        return new WC_Product(123, 'Meniu restaurant A4');
     }
-    return new WC_Product(123, 'Meniu restaurant A4');
+    if (124 === (int) $id) {
+        return new WC_Product(124, 'Proiect complex fara pret', '', false);
+    }
+    return null;
 }
 function wc_prices_include_tax() { return false; }
 function wc_get_price_decimals() { return 2; }
