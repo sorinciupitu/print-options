@@ -78,6 +78,14 @@ function apply_filters($hook, $value, ...$args) {
 function add_shortcode($tag, $callback) {
     $GLOBALS['pov_test']['shortcodes'][$tag] = $callback;
 }
+function shortcode_atts($pairs, $atts, $shortcode = '') {
+    $atts = (array) $atts;
+    $out = array();
+    foreach ((array) $pairs as $name => $default) {
+        $out[$name] = array_key_exists($name, $atts) ? $atts[$name] : $default;
+    }
+    return $out;
+}
 function has_shortcode($content, $tag) {
     return false !== strpos((string) $content, '[' . $tag . ']');
 }

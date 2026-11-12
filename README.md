@@ -27,6 +27,22 @@ Produs → **Opțiuni vizuale produs** → tab **Cerere ofertă** → bifează *
 
 Butonul apare sub butonul „Adaugă în coș” și deschide pagina *Cere ofertă* cu produsul completat automat (`?pov_product=ID`).
 
+### Dacă butonul nu apare (produse fără preț)
+
+Pe produsele fără preț WooCommerce nu randează deloc formularul „Adaugă în coș”. Pluginul acoperă asta în două feluri:
+
+1. butonul e adăugat automat la finalul descrierii produsului, când produsul nu are preț;
+2. poți plasa butonul manual cu shortcode-ul:
+
+```
+[pov_quote_button]                  butonul pentru produsul curent
+[pov_quote_button id="123"]         butonul pentru un anumit produs
+[pov_quote_button force="1"]        apare chiar dacă bifa e dezactivată
+[pov_quote_button label="Cere ofertă"]
+```
+
+Shortcode-ul merge în descrierea produsului, în Elementor (widget Shortcode) sau în orice widget HTML.
+
 ### Pagina și cererile
 
 - Pagina: **Pagini → Cere ofertă** (conține shortcode-ul `[pov_quote_form]`, poți edita titlul și textul din jur).

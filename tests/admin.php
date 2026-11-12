@@ -108,6 +108,38 @@ $output = ob_get_clean();
 check(1 === substr_count($output, 'pov-quote-btn'), 'button appears for a product without a price');
 check(false !== strpos($output, 'pov_product=124'), 'button keeps the product id');
 
+echo "\nShortcode [pov_quote_button]\n";
+update_post_meta(130, '_pov_settings', array('quote' => 1, 'min' => 1, 'step' => 1, 'mode' => 'fixed'));
+update_post_meta(131, '_pov_settings', array('quote' => 0, 'min' => 1, 'step' => 1, 'mode' => 'fixed'));
+$GLOBALS['product'] = new WC_Product(130, 'Produs cu oferta', '', false);
+$shortcode = $plugin->quote_shortcode(array());
+check(false !== strpos($shortcode, 'pov-quote-btn'), 'shortcode renders the button for the current product');
+check(false !== strpos($shortcode, 'pov_product=130'), 'shortcode uses the current product id');
+check('' === $plugin->quote_shortcode(array()), 'shortcode prints only once per product');
+
+$GLOBALS['product'] = new WC_Product(131, 'Produs fara oferta', '', false);
+check('' === $plugin->quote_shortcode(array()), 'shortcode is hidden when the option is off');
+check(false !== strpos($plugin->quote_shortcode(array('force' => '1', 'id' => '131')), 'pov_product=131'), 'force attribute overrides the option');
+
+update_post_meta(132, '_pov_settings', array('quote' => 1, 'min' => 1, 'step' => 1, 'mode' => 'fixed'));
+$GLOBALS['product'] = null;
+check(false !== strpos($plugin->quote_shortcode(array('id' => '132')), 'pov_product=132'), 'explicit id works outside the product loop');
+
+echo "\nContent fallback for products without a price\n";
+update_post_meta(140, '_pov_settings', array('quote' => 1, 'min' => 1, 'step' => 1, 'mode' => 'fixed'));
+$GLOBALS['product'] = new WC_Product(140, 'Produs cu pret', 25, true);
+$content = apply_filters('the_content', '<p>Descriere</p>');
+check('<p>Descriere</p>' === $content, 'priced product content is untouched');
+
+update_post_meta(141, '_pov_settings', array('quote' => 1, 'min' => 1, 'step' => 1, 'mode' => 'fixed'));
+$GLOBALS['product'] = new WC_Product(141, 'Proiect fara pret', '', false);
+$content = apply_filters('the_content', '<p>Descriere</p>');
+check(false !== strpos($content, '<p>Descriere</p>'), 'original content is kept');
+check(false !== strpos($content, 'pov-quote-btn'), 'button is appended to a product without a price');
+check(false !== strpos($content, 'pov_product=141'), 'fallback keeps the product id');
+check(1 === substr_count($content, 'pov-quote-btn'), 'only one button is added');
+check('<p>Descriere</p>' === apply_filters('the_content', '<p>Descriere</p>'), 'fallback does not duplicate on a second pass');
+
 echo "\nQuote page URL\n";
 check('https://example.test/?p=10' === POV_Quote::page_url(), 'page url comes from the stored page');
 

@@ -4,7 +4,7 @@ Tags: woocommerce, product options, quote request, print shop
 Requires at least: 6.0
 Tested up to: 6.8
 Requires PHP: 7.4
-Stable tag: 1.8.0
+Stable tag: 1.9.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -39,6 +39,11 @@ Da. Titlul și conținutul din jurul shortcode-ului sunt editabile din Pagini �
 
 == Changelog ==
 
+= 1.9.0 =
+* Shortcode `[pov_quote_button]` pentru plasarea butonului oriunde (descriere produs, Elementor, widget HTML).
+* Butonul se adaugă automat la finalul descrierii produselor fără preț, dacă tema nu afișează formularul de comandă.
+* Atribute: `id`, `label`, `force`.
+
 = 1.8.0 =
 * Butonul „Cere ofertă” apare și pe produsele fără preț, acolo unde WooCommerce nu afișează formularul „Adaugă în coș”.
 * Buton restilizat: fundal #DA0068, icon și text albe.
@@ -53,6 +58,9 @@ Da. Titlul și conținutul din jurul shortcode-ului sunt editabile din Pagini �
 * Îmbunătățiri la prețul flotant și la șabloanele de produs.
 
 == Upgrade Notice ==
+
+= 1.9.0 =
+Adaugă shortcode-ul pentru buton și afișarea automată la produsele fără preț.
 
 = 1.8.0 =
 Butonul Cere ofertă apare acum și la produsele fără preț.
