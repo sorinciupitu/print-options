@@ -204,11 +204,13 @@ final class POV_Updater {
 
         $links[] = '<a href="' . esc_url(self::plugin_url()) . '" target="_blank" rel="noopener">GitHub</a>';
 
-        $url = wp_nonce_url(
-            add_query_arg('action', 'pov_check_updates', admin_url('admin-post.php')),
-            'pov_check_updates'
-        );
-        $links[] = '<a href="' . esc_url($url) . '">Verifică actualizări</a>';
+        if (current_user_can('update_plugins')) {
+            $url = wp_nonce_url(
+                add_query_arg('action', 'pov_check_updates', admin_url('admin-post.php')),
+                'pov_check_updates'
+            );
+            $links[] = '<a href="' . esc_url($url) . '">Verifică actualizări</a>';
+        }
 
         return $links;
     }

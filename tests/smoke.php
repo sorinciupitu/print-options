@@ -152,6 +152,36 @@ check(false !== strpos($html, 'Completează numele tău.'), 'name error is shown
 check(false !== strpos($html, 'Introdu o adresă de email validă.'), 'email error is shown');
 check(false !== strpos($html, 'value="not-an-email"'), 'typed values are kept');
 
+echo "\nExtra empty row\n";
+reset_store();
+reset_quote_state();
+$GLOBALS['pov_test']['uploads'] = array();
+$_FILES = array(
+    'pov_files' => array(
+        'name'     => array('0' => array(''), 'n1' => array('')),
+        'type'     => array('0' => array(''), 'n1' => array('')),
+        'tmp_name' => array('0' => array(''), 'n1' => array('')),
+        'error'    => array('0' => array(4), 'n1' => array(4)),
+        'size'     => array('0' => array(0), 'n1' => array(0)),
+    ),
+);
+$redirect = submit(array(
+    'pov_quote' => array(
+        'name'  => 'Ana Popescu',
+        'email' => 'ana@example.com',
+        'items' => array(
+            '0'  => array('name' => 'Meniuri', 'desc' => '', 'qty' => 100, 'product_id' => 0),
+            'n1' => array('name' => '', 'desc' => '', 'qty' => 1, 'product_id' => 0),
+        ),
+    ),
+));
+check(false !== strpos($redirect, 'pov_sent='), 'blank extra row does not block the form');
+$ids = quote_posts();
+if ($ids) {
+    $items = get_post_meta($ids[0], '_pov_quote_items', true);
+    check(1 === count($items), 'blank extra row is dropped');
+}
+
 echo "\nHoneypot\n";
 reset_store();
 reset_quote_state();

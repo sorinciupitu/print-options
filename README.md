@@ -2,6 +2,8 @@
 
 Opțiuni vizuale, cantități și prețuri pentru produsele WooCommerce, plus fluxul **Cere ofertă**: un buton pe orice produs care deschide o pagină de cerere de ofertă cu produsul pre-completat.
 
+![Pagina Cere ofertă](docs/preview-cere-oferta.png)
+
 ## Ce conține
 
 - Buton per produs **„Afisare buton Cere ofertă”** (bifă în editorul de produs, tab *Cerere ofertă*).
@@ -44,6 +46,20 @@ Pluginul instalat citește `https://api.github.com/repos/sorinciupitu/print-opti
 > Versiunea din header-ul din repo (ex. `1.7.0`) este doar baza `major.minor`. Numărul real al release-ului este adăugat la build, ca să nu fie nevoie de commit-uri automate de versionare (care ar produce conflicte la fiecare push).
 
 Pentru a forța o verificare imediată: **Plugins → Print Options → Verifică actualizări**.
+
+## Teste
+
+```bash
+php tests/smoke.php         # fluxul de cerere: validare, email, upload, rate limit, updater
+php tests/admin.php         # bifa din editor, salvarea, butonul de pe pagina produsului
+php tests/live-update.php   # verifică API-ul GitHub real (POV_TEST_VERSION=1.7.1 php tests/live-update.php)
+```
+
+Testele folosesc stub-uri WordPress (`tests/bootstrap.php`), nu au nevoie de o instalare WordPress.
+
+## Temă
+
+Pagina „Cere ofertă” își afișează propriul titlu, așa că titlul duplicat al temei este ascuns doar pe această pagină (clasa `pov-quote-page`). Dacă tema folosește alți selectori pentru titlu, adaugă regula în CSS-ul temei.
 
 ## Dezvoltare
 

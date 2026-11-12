@@ -475,7 +475,7 @@ final class POV_Quote {
         $items = array();
         $index = 0;
         foreach ($posted['items'] as $key => $item) {
-            $has_files = !empty($_FILES['pov_files']['name'][$key]);
+            $has_files = self::has_files($key);
             if ('' === $item['name'] && '' === $item['desc'] && !$has_files) {
                 continue;
             }
@@ -512,7 +512,18 @@ final class POV_Quote {
     }
 
     private static function store($data) {
-        $title = sprintf('%s — %s', wp_date('d.m.Y H:i'), $data['name']);
+        $title  = sprintf('%s — %s', wp_date('d.m.Y H:i'), $data['name']);
+        $source = '';
+        foreach ($data['items'] as $item) {
+            if (!empty($item['product_id'])) {
+                $link = get_permalink((int) $item['product_id']);
+                if ($link) {
+                    $source = $link;
+                    break;
+                }
+            }
+        }
+        $referer = isset($_SERVER['HTTP_REFERER']) ? esc_url_raw(wp_unslash($_SERVER['HTTP_REFERER'])) : '';
         $id    = wp_insert_post(
             array(
                 'post_type'   => self::CPT,
@@ -523,7 +534,8 @@ final class POV_Quote {
                     '_pov_quote_email'  => $data['email'],
                     '_pov_quote_phone'  => $data['phone'],
                     '_pov_quote_items'  => $data['items'],
-                    '_pov_quote_source' => isset($_SERVER['HTTP_REFERER']) ? esc_url_raw(wp_unslash($_SERVER['HTTP_REFERER'])) : '',
+                    '_pov_quote_source'  => $source,
+                    '_pov_quote_referer' => $referer,
                     '_pov_quote_ip'     => self::client_ip(),
                     '_pov_quote_ua'     => isset($_SERVER['HTTP_USER_AGENT']) ? sanitize_text_field(wp_unslash($_SERVER['HTTP_USER_AGENT'])) : '',
                 ),
@@ -604,6 +616,26 @@ final class POV_Quote {
             return 0 === strncmp($sig, '8BPS', 4);
         }
         return 0 === strncmp($sig, '%!PS', 4);
+    }
+
+    /**
+     * A file input that was left empty still shows up in $_FILES with an empty
+     * name and UPLOAD_ERR_NO_FILE, so it must not count as content.
+     */
+    private static function has_files($key) {
+        if (empty($_FILES['pov_files']['name'][$key])) {
+            return false;
+        }
+        foreach ((array) $_FILES['pov_files']['name'][$key] as $index => $name) {
+            if ('' === $name) {
+                continue;
+            }
+            if (isset($_FILES['pov_files']['error'][$key][$index]) && UPLOAD_ERR_NO_FILE === (int) $_FILES['pov_files']['error'][$key][$index]) {
+                continue;
+            }
+            return true;
+        }
+        return false;
     }
 
     private static function upload_files($key, &$errors) {
@@ -967,7 +999,11 @@ final class POV_Quote {
         echo '<p class="pov-muted">Trimisă la ' . esc_html(get_the_date('d.m.Y H:i')) . '</p>';
         echo '<p class="pov-muted">Email notificare: ' . ($sent ? 'trimis' : 'netrimis') . '</p>';
         if ($source) {
-            echo '<p class="pov-muted">Pagina sursă: <a href="' . esc_url($source) . '" target="_blank" rel="noopener">' . esc_html(wp_parse_url($source, PHP_URL_PATH)) . '</a></p>';
+            echo '<p class="pov-muted">Produs sursă: <a href="' . esc_url($source) . '" target="_blank" rel="noopener">' . esc_html(wp_parse_url($source, PHP_URL_PATH)) . '</a></p>';
+        }
+        $referer = (string) get_post_meta($id, '_pov_quote_referer', true);
+        if ($referer) {
+            echo '<p class="pov-muted">Pagina de proveniență: <a href="' . esc_url($referer) . '" target="_blank" rel="noopener">' . esc_html(wp_parse_url($referer, PHP_URL_PATH)) . '</a></p>';
         }
         echo '<p>Status: ' . ('new' === $status ? '<span class="pov-status pov-status-new">Nouă</span>' : '<span class="pov-status pov-status-done">Rezolvată</span>') . '</p>';
 
